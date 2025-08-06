@@ -1,0 +1,123 @@
+import pandas as pd
+
+df=pd.read_csv("/content/flight_delays.csv")
+df.info()
+
+///output
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1747627 entries, 0 to 1747626
+Data columns (total 16 columns):
+ #   Column              Dtype 
+---  ------              ----- 
+ 0   FlightID            int64 
+ 1   Airline             object
+ 2   FlightNumber        int64 
+ 3   Origin              object
+ 4   Destination         object
+ 5   ScheduledDeparture  object
+ 6   ActualDeparture     object
+ 7   ScheduledArrival    object
+ 8   ActualArrival       object
+ 9   DelayMinutes        int64 
+ 10  DelayReason         object
+ 11  Cancelled           bool  
+ 12  Diverted            bool  
+ 13  AircraftType        object
+ 14  TailNumber          object
+ 15  Distance            int64 
+dtypes: bool(2), int64(4), object(10)///
+
+//Checking unique values
+for i in df.columns:
+  print(i,df[i].unique(),df[i].nunique())
+
+///Output
+FlightID [      1       2       3 ... 1747625 1747626 1747627] 1747627
+Airline ['United' 'Delta' 'Southwest' 'American Airlines'] 4
+FlightNumber [4558 8021 7520 ... 7506 5464 6848] 9999
+Origin ['ORD' 'LAX' 'DFW' 'JFK' 'ATL'] 5
+Destination ['MIA' 'SFO' 'BOS' 'SEA' 'JFK'] 5
+ScheduledDeparture ['2024-09-01 08:11' '2024-09-01 10:25' '2024-09-01 16:53' ...
+ '2024-09-01 09:50' '2024-09-01 12:52' '2024-09-01 18:59'] 1440
+ActualDeparture ['2024-09-01 08:30' '2024-09-01 10:41' '2024-09-01 17:05' ...
+ '2024-09-01 00:01' '2024-09-01 00:00' '2024-09-02 00:29'] 1470
+ScheduledArrival ['2024-09-01 12:11' '2024-09-01 13:25' '2024-09-01 17:53' ...
+ '2024-09-01 01:54' '2024-09-01 01:11' '2024-09-02 05:22'] 1740
+ActualArrival ['2024-09-01 12:19' '2024-09-01 13:27' '2024-09-01 18:07' ...
+ '2024-09-02 06:27' '2024-09-01 00:51' '2024-09-02 06:29'] 1780
+DelayMinutes [  8   2  14 -10  24  -5   7  25  -6  30   3  13  26  -9  17  16  29  21
+  23   4  10  28  12  18  27   9  -2  19   0  -1  -7  22  -3  15  20   5
+   1  -8   6  11  -4] 41
+DelayReason ['Weather' 'Air Traffic Control' nan 'Maintenance'] 3
+Cancelled [ True False] 2
+Diverted [False  True] 2
+AircraftType ['Boeing 737' 'Airbus A320' 'Boeing 777'] 3
+TailNumber ['N71066' 'N22657' 'N95611' ... 'N60509' 'N82963' 'N80211'] 90000
+Distance [1031 1006 2980 ... 1607  445  604] 2901///
+
+
+//Handling Nan
+
+df.fillna("No Data",inplace=True) #df=df.fillna("No Data") 
+df["DelayReason"].unique()
+
+///Output
+array(['Weather', 'Air Traffic Control', 'No Data', 'Maintenance'],
+      dtype=object)
+///
+
+//Handling Dates
+
+df["ScheduledDeparture"]=pd.to_datetime(df["ScheduledDeparture"],format="%Y-%m-%d %H:%M")
+df["ActualDeparture"]=pd.to_datetime(df["ActualDeparture"],format="%Y-%m-%d %H:%M")
+df["ScheduledArrival"]=pd.to_datetime(df["ScheduledArrival"],format="%Y-%m-%d %H:%M")
+df["ActualArrival"]=pd.to_datetime(df["ActualArrival"],format="%Y-%m-%d %H:%M")
+
+//Encoding data
+
+from sklearn.preprocessing import LabelEncoder #scikit learn
+df_LableEncoder=LabelEncoder()
+for j in df.columns:
+  df[j]=df_LableEncoder.fit_transform(df[j])
+
+///Encoded output
+
+FlightID	Airline	FlightNumber	Origin	Destination	ScheduledDeparture	ActualDeparture	ScheduledArrival	ActualArrival	DelayMinutes	DelayReason	Cancelled	Diverted	AircraftType	TailNumber	Distance
+0	0	3	4557	4	2	491	510	671	689	18	3	1	0	1	61066	931
+1	1	1	8020	3	2	625	641	745	757	12	0	1	1	0	12657	906
+2	2	2	7519	1	4	1013	1025	1013	1037	24	3	1	1	1	85611	2880
+3	3	1	2045	4	0	884	904	1064	1064	0	2	0	0	2	80029	1308
+4	4	1	6048	3	3	111	128	291	325	34	0	0	1	1	17417	2198
+...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...	...
+1747622	1747622	3	4144	1	2	766	774	1006	1011	5	2	0	1	1	9796	2296
+1747623	1747623	3	2154	0	3	1243	1254	1243	1273	30	3	1	0	2	58154	2085
+1747624	1747624	1	4877	2	4	206	227	326	330	4	2	0	0	2	8964	261
+1747625	1747625	1	2939	2	3	484	487	724	750	26	1	0	1	0	84591	2693
+1747626	1747626	3	1318	3	2	766	791	886	915	29	1	1	1	1	66065	1401
+1747627 rows × 16 columns///
+
+///Checking correlation
+
+df.corr()
+
+///Output
+
+
+FlightID	Airline	FlightNumber	Origin	Destination	ScheduledDeparture	ActualDeparture	ScheduledArrival	ActualArrival	DelayMinutes	DelayReason	Cancelled	Diverted	AircraftType	TailNumber	Distance
+FlightID	1.000000	-0.000555	-0.000025	-0.000904	-0.001152	0.000277	0.000276	0.000265	0.000254	-0.000389	0.000431	-0.000970	-0.000919	0.001360	0.000302	-0.001056
+Airline	-0.000555	1.000000	0.001011	-0.000123	-0.000800	0.000238	0.000244	-0.000161	-0.000146	0.000543	-0.000102	-0.000922	-0.000679	-0.001561	0.000335	0.000283
+FlightNumber	-0.000025	0.001011	1.000000	0.000541	0.000141	-0.000075	-0.000102	0.000154	0.000142	-0.000429	0.001773	-0.000859	0.000912	-0.001348	-0.000033	-0.000520
+Origin	-0.000904	-0.000123	0.000541	1.000000	-0.000117	-0.000752	-0.000756	-0.000947	-0.000946	0.000035	0.001142	0.000349	-0.000561	0.000564	0.000820	-0.000181
+Destination	-0.001152	-0.000800	0.000141	-0.000117	1.000000	0.000731	0.000724	0.000733	0.000759	0.000951	-0.000878	0.000197	0.001022	0.000806	-0.000302	0.000413
+ScheduledDeparture	0.000277	0.000238	-0.000075	-0.000752	0.000731	1.000000	0.999768	0.970930	0.970554	-0.001827	0.000341	-0.000665	-0.000489	0.000740	0.000166	0.000612
+ActualDeparture	0.000276	0.000244	-0.000102	-0.000756	0.000724	0.999768	1.000000	0.970710	0.970334	-0.001809	0.000339	-0.000688	-0.000490	0.000730	0.000151	0.000629
+ScheduledArrival	0.000265	-0.000161	0.000154	-0.000947	0.000733	0.970930	0.970710	1.000000	0.999618	-0.001680	0.000150	-0.000491	-0.000603	0.000466	0.000169	0.000610
+ActualArrival	0.000254	-0.000146	0.000142	-0.000946	0.000759	0.970554	0.970334	0.999618	1.000000	0.025950	-0.005519	-0.000501	-0.000571	0.000502	0.000180	0.000620
+DelayMinutes	-0.000389	0.000543	-0.000429	0.000035	0.000951	-0.001827	-0.001809	-0.001680	0.025950	1.000000	-0.205200	-0.000346	0.001128	0.001302	0.000416	0.000381
+DelayReason	0.000431	-0.000102	0.001773	0.001142	-0.000878	0.000341	0.000339	0.000150	-0.005519	-0.205200	1.000000	0.000466	0.000081	0.000233	0.001752	0.000158
+Cancelled	-0.000970	-0.000922	-0.000859	0.000349	0.000197	-0.000665	-0.000688	-0.000491	-0.000501	-0.000346	0.000466	1.000000	0.000970	-0.000580	-0.000631	-0.000112
+Diverted	-0.000919	-0.000679	0.000912	-0.000561	0.001022	-0.000489	-0.000490	-0.000603	-0.000571	0.001128	0.000081	0.000970	1.000000	-0.000530	0.000814	0.000755
+AircraftType	0.001360	-0.001561	-0.001348	0.000564	0.000806	0.000740	0.000730	0.000466	0.000502	0.001302	0.000233	-0.000580	-0.000530	1.000000	0.000259	0.000523
+TailNumber	0.000302	0.000335	-0.000033	0.000820	-0.000302	0.000166	0.000151	0.000169	0.000180	0.000416	0.001752	-0.000631	0.000814	0.000259	1.000000	-0.001071
+Distance	-0.001056	0.000283	-0.000520	-0.000181	0.000413	0.000612	0.000629	0.000610	0.000620	0.000381	0.000158	-0.000112	0.000755	0.000523	-0.001071	1.000000
+///
